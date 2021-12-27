@@ -1,0 +1,12 @@
+{
+  "name": "ButtonFunction",
+  "keywords": "button, tap, press, push, function",
+  "description": "",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/noumanmhd/button-function-arduino.git"
+  },
+  "frameworks": "arduino",
+  "platforms": "*"
+}
