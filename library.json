@@ -1,12 +1,29 @@
 {
   "name": "ButtonFunction",
   "keywords": "button, tap, press, push, function",
-  "description": "",
-  "repository":
-  {
+  "description": "A library for detecting button taps and long presses on Arduino.",
+  "repository": {
     "type": "git",
     "url": "https://github.com/noumanmhd/button-function-arduino.git"
   },
+  "authors": [
+    {
+      "name": "Your Name",
+      "email": "your.email@example.com",
+      "url": "https://yourwebsite.com"
+    }
+  ],
+  "homepage": "https://github.com/noumanmhd/button-function-arduino",
+  "license": "MIT",
+  "dependencies": {},
   "frameworks": "arduino",
-  "platforms": "*"
+  "platforms": "*",
+  "version": "1.0.0",
+  "examples": [
+    {
+      "name": "OnePushButton",
+      "description": "An example of using ButtonFunction with a single push button.",
+      "url": "https://github.com/noumanmhd/button-function-arduino/tree/main/examples/OnePushButton"
+    }
+  ]
 }

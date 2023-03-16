@@ -1,136 +1,100 @@
 #include "buttonfunc.h"
 
-BTN_RECORD::BTN_RECORD(byte t, byte h, voidFunc f) {
-  tap = t;
-  hold = h;
-  func = f;
-  next = nullptr;
+ButtonFunction::ButtonFunction(const byte pin, const bool activeHigh, const bool usePullUp)
+    : m_pin(pin), m_activeHigh(activeHigh), m_usePullUp(usePullUp)
+{}
+
+void ButtonFunction::begin()
+{
+    m_lastPressedTime = 0;
+    m_numTaps = 0;
+    m_numHolds = 0;
+    pinMode(m_pin, m_usePullUp ? INPUT_PULLUP : INPUT);
 }
 
-ButtonFunction::ButtonFunction(byte p) {
-  t = dt = tap = hold = 0;
-  record = nullptr;
-  pin = p;
-  max_tap_delay = TAP_MAX_DELAY;
-  gap_delay = GAP_DELAY;
+void ButtonFunction::attachTap(voidFunc func, const byte n_tap)
+{
+    addRecord(n_tap, 0, func);
 }
 
-void ButtonFunction::addRecord(byte t, byte h, voidFunc func) {
-  BTN_RECORD *newRecord = new BTN_RECORD(t, h, func);
-
-  if (record == nullptr) {
-    record = newRecord;
-  } else {
-    BTN_RECORD *tempRecord = record;
-    while (tempRecord->next != nullptr) {
-      tempRecord = tempRecord->next;
-    }
-    tempRecord->next = newRecord;
-  }
+void ButtonFunction::attachLongPress(voidFunc func, const byte n_hold)
+{
+    addRecord(0, n_hold, func);
 }
 
-void ButtonFunction::clearRecord() {
-  BTN_RECORD *current = record;
-  BTN_RECORD *next = nullptr;
-  record = nullptr;
-  while (current != nullptr) {
-    next = current->next;
-    delete current;
-    current = next;
-  }
+void ButtonFunction::attachTapAndPress(voidFunc func, const byte n_tap, const byte n_hold)
+{
+    addRecord(n_tap, n_hold, func);
 }
 
-void ButtonFunction::begin() {
-  clearRecord();
-  on_state = true;
-  pinMode(pin, INPUT);
-}
+void ButtonFunction::scan(){
+    if (isPressed())
+    {
+        const unsigned long now = millis();
+        const unsigned long pressDuration = pressRoutine();
+        const bool tap = pressDuration < m_maxTapDelay;
+        m_numTaps += tap;
+        m_numHolds += !tap;
+        m_lastPressedTime = now;
 
-void ButtonFunction::begin(bool btn_on_state) {
-  clearRecord();
-  on_state = btn_on_state;
-  if (on_state) {
-    pinMode(pin, INPUT);
-  } else {
-    pinMode(pin, INPUT_PULLUP);
-  }
-}
-
-void ButtonFunction::begin(bool on_state, bool pullup) {
-  clearRecord();
-  on_state = on_state;
-  if (pullup) {
-    pinMode(pin, INPUT_PULLUP);
-  } else {
-    pinMode(pin, INPUT);
-  }
-}
-
-bool ButtonFunction::readInput() {
-  double sum = 0;
-  for (int i = 0; i < SAMPLES_SIZE; i++) {
-    sum += (digitalRead(pin) == on_state);
-    delay(SAMPLES_DELAY);
-  }
-  sum = round(sum / SAMPLES_SIZE);
-  return (sum == 1);
-}
-
-unsigned long ButtonFunction::pressRoutine() {
-  unsigned long hold_t = millis();
-  while (readInput())
-    ;
-  hold_t = millis() - hold_t;
-  return hold_t;
-}
-
-void ButtonFunction::scan() {
-  bool state = true;
-  while (state) {
-    dt = millis() - t;
-    if (readInput()) {
-      unsigned int press_time = pressRoutine();
-      if (press_time < max_tap_delay) {
-        tap++;
-      } else {
-        hold++;
-      }
-      t = millis();
-      dt = 0;
-      state = true;
-    } else {
-      state = false;
-    }
-
-    if (dt > gap_delay) {
-      state = false;
-      if (tap > 0 || hold > 0) {
-        BTN_RECORD *current = record;
-        while (current != nullptr) {
-          if ((tap == current->tap) && (hold == current->hold)) {
-            current->func();
-          }
-          current = current->next;
+        for (auto& r : m_records)
+        {
+            if (m_numTaps == r.n_tap && m_numHolds == r.n_hold)
+            {
+                r.func();
+            }
         }
-
-        tap = 0;
-        hold = 0;
-      }
     }
-  }
+    else if (millis() - m_lastPressedTime >= m_gapDelay)
+    {
+        m_numTaps = 0;
+        m_numHolds = 0;
+    }
 }
 
-void ButtonFunction::setGapDelay(unsigned long t) { gap_delay = t; }
-
-void ButtonFunction::setMaxTapDelay(unsigned long t) { max_tap_delay = t; }
-
-void ButtonFunction::attachTap(voidFunc func, byte times) {
-  addRecord(times, 0, func);
+void ButtonFunction::setGapDelay(const unsigned int gapDelay)
+{
+    m_gapDelay = gapDelay;
 }
-void ButtonFunction::attachLongPress(voidFunc func, byte times) {
-  addRecord(0, times, func);
+
+void ButtonFunction::setMaxTapDelay(const unsigned int maxTapDelay)
+{
+    m_maxTapDelay = maxTapDelay
 }
-void ButtonFunction::attachTapAndPress(voidFunc func, byte n_tap,
-                                       byte n_press) {
-  addRecord(n_tap, n_press, func);
+
+void ButtonFunction::addRecord(const byte n_tap, const byte n_hold, voidFunc func)
+{
+m_records.push_back({ n_tap, n_hold, func });
+}
+
+void ButtonFunction::clearRecords()
+{
+m_records.clear();
+}
+
+bool ButtonFunction::readInput()
+{
+unsigned int sum = 0;
+for (byte i = 0; i < SAMPLES_SIZE; i++)
+{
+sum += digitalRead(m_pin) == m_activeHigh;
+delay(SAMPLES_DELAY);
+}
+return sum > SAMPLES_SIZE / 2;
+}
+
+unsigned long ButtonFunction::pressRoutine()
+{
+unsigned long holdDuration = 0;
+while (isPressed())
+{
+holdDuration = millis() - m_lastPressedTime;
+delay(SAMPLES_DELAY);
+}
+return holdDuration;
+}
+
+bool ButtonFunction::isPressed()
+{
+return digitalRead(m_pin) == m_activeHigh;
 }

@@ -31,5 +31,15 @@
 *.out
 *.app
 
-# Vscode 
-.vscode
+# IDE and editor specific files
+.vscode/
+*.swp
+.DS_Store
+.idea/
+*.sublime-project
+*.sublime-workspace
+*~
+*.bak
+*.backup
+*.tmp
+*.log

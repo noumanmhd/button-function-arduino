@@ -1,62 +1,47 @@
+#pragma once
+
 #include <Arduino.h>
+#include <vector>
 
-#ifndef BUTTON_FUNC_H
-#define BUTTON_FUNC_H
+constexpr unsigned int GAP_DELAY = 500;
+constexpr unsigned int TAP_MAX_DELAY = 400;
+constexpr unsigned int SAMPLES_SIZE = 20;
+constexpr unsigned int SAMPLES_DELAY = 1;
 
-#define GAP_DELAY 500
-#define TAP_MAX_DELAY 400
-
-#define SAMPLES_SIZE 20
-#define SAMPLES_DELAY 1
-
-typedef void (*voidFunc)(void);
-
-class BTN_RECORD {
- public:
-  byte tap;
-  byte hold;
-  voidFunc func;
-  BTN_RECORD *next;
-  BTN_RECORD(byte, byte, voidFunc);
-};
+using voidFunc = void (*)();
 
 class ButtonFunction {
- private:
-  byte pin;
-  bool on_state;
-  unsigned long t;
-  unsigned long dt;
+  public:
+    ButtonFunction(const byte pin, const bool activeHigh = true, const bool usePullUp = true);
 
-  unsigned long gap_delay;
-  unsigned long max_tap_delay;
+    void begin();
+    void attachTap(voidFunc func, const byte n_tap = 1);
+    void attachLongPress(voidFunc func, const byte n_hold = 1);
+    void attachTapAndPress(voidFunc func, const byte n_tap = 1, const byte n_hold = 1);
+    void scan();
+    void setGapDelay(const unsigned int gapDelay);
+    void setMaxTapDelay(const unsigned int maxTapDelay);
 
-  byte tap;
-  byte hold;
+  private:
+    const byte m_pin;
+    const bool m_activeHigh;
+    const bool m_usePullUp;
+    unsigned long m_lastPressedTime = 0;
+    unsigned long m_maxTapDelay = TAP_MAX_DELAY;
+    unsigned long m_gapDelay = GAP_DELAY;
+    byte m_numTaps = 0;
+    byte m_numHolds = 0;
 
-  BTN_RECORD *record;
-  unsigned int size;
+    struct Record {
+        byte n_tap = 0;
+        byte n_hold = 0;
+        voidFunc func = nullptr;
+    };
+    std::vector<Record> m_records;
 
-  void addRecord(byte, byte, voidFunc);
-  void clearRecord();
-
-  bool readInput();
-  unsigned long pressRoutine();
-
- public:
-  ButtonFunction(byte);
-
-  void begin();
-  void begin(bool);
-  void begin(bool, bool);
-
-  void attachTap(voidFunc, byte times);
-  void attachLongPress(voidFunc, byte times);
-  void attachTapAndPress(voidFunc, byte n_tap, byte n_press);
-
-  void scan();
-
-  void setGapDelay(unsigned long);
-  void setMaxTapDelay(unsigned long);
+    void addRecord(const byte n_tap, const byte n_hold, voidFunc func);
+    void clearRecords();
+    bool readInput();
+    unsigned long pressRoutine();
+    bool isPressed();
 };
-
-#endif

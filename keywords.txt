@@ -1,24 +1,13 @@
-#######################################
-# Syntax Coloring Map For ButtonFunction
-#######################################
+# ButtonFunction syntax highlighting map
 
-#######################################
-# Datatypes (KEYWORD1)
-#######################################
-
+# Datatypes
 ButtonFunction	KEYWORD1
 
-#######################################
-# Methods and Functions (KEYWORD2)
-#######################################
-
+# Methods and Functions
 begin	KEYWORD2
 scan	KEYWORD2
-
 attachTap	KEYWORD2
 attachLongPress	KEYWORD2
 attachTapAndPress	KEYWORD2
-
 setGapDelay	KEYWORD2
 setMaxTapDelay	KEYWORD2
-
