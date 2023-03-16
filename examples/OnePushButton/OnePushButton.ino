@@ -1,4 +1,4 @@
-#include <buttonfunc.h>
+#include <ButtonFunction.h>
 
 ButtonFunction button(A2);
 
@@ -26,8 +26,8 @@ void loop() {
   // Your Code here
 }
 
-void sayHi() { 
-    Serial.println("Hi"); 
+void sayHi() {
+    Serial.println("Hi");
 }
 
 void toggleLed() {

@@ -1,4 +1,4 @@
-#include "buttonfunc.h"
+#include "ButtonFunction.h"
 
 ButtonFunction::ButtonFunction(const byte pin, const bool activeHigh, const bool usePullUp)
     : m_pin(pin), m_activeHigh(activeHigh), m_usePullUp(usePullUp)

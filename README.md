@@ -13,10 +13,10 @@ To use the ButtonFunction library, follow these steps:
 ## Usage
 To use the ButtonFunction library in your Arduino sketch, follow these steps:
 
-1. Include the `buttonfunc.h` header file at the beginning of your sketch:
+1. Include the `ButtonFunction.h` header file at the beginning of your sketch:
 
    ```c++
-   #include "buttonfunc.h"
+   #include "ButtonFunction.h"
     ```
 
 2. Create a ButtonFunction object, specifying the pin that the button is connected to:
@@ -76,7 +76,7 @@ To use the ButtonFunction library in your Arduino sketch, follow these steps:
 The following example sketch demonstrates how to use the ButtonFunction library:
 
 ```c++
-#include "buttonfunc.h"
+#include "ButtonFunction.h"
 
 ButtonFunction button(2);
 
